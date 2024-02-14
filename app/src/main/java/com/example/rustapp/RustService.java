@@ -134,21 +134,4 @@ public class RustService extends Service {
             Log.e("RustService", "Error writing to log file: " + e.getMessage());
         }
     }
-//    class MyThread extends Thread {
-//        public void run() {
-//            int i = 0;
-//            while(running) {
-//                try {
-//                    Thread.sleep(10000);
-//                    String logMessages = "Thread running. Count: " + i;
-//                    Log.d("RustService", logMessages);
-//                    appendLog(logMessages);
-//                    i++;
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        }
-//    }
-
 }
