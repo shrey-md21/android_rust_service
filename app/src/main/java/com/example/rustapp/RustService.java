@@ -134,11 +134,6 @@ public class RustService extends Service {
             Log.e("RustService", "Error writing to log file: " + e.getMessage());
         }
     }
-//    private String getCurrentTimeStamp() {
-//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-//        return sdf.format(new Date());
-//    }
-
 //    class MyThread extends Thread {
 //        public void run() {
 //            int i = 0;
