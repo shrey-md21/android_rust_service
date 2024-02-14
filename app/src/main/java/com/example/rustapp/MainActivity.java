@@ -5,6 +5,7 @@ import android.app.Application;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.Toast;
@@ -14,14 +15,20 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.materialswitch.MaterialSwitch;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
 
 public class MainActivity extends AppCompatActivity implements Application.ActivityLifecycleCallbacks {
+    private int numStarted = 0;
+    private static final String LOG_FILE_NAME = "rust_logs.txt";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_main);
         getApplication().registerActivityLifecycleCallbacks(this);
 
@@ -37,24 +44,55 @@ public class MainActivity extends AppCompatActivity implements Application.Activ
                         stopService(serviceIntent);
                 });
 
-        ((Button) findViewById(R.id.clearLogs)).setOnClickListener(view -> {
+        findViewById(R.id.clearLogs).setOnClickListener(view -> {
             try {
                 new FileOutputStream(new File(this.getFilesDir(), "fsmon_log.yaml")).close();
-                Toast.makeText(this, "Logs Cleared!", Toast.LENGTH_SHORT).show();
+                showToast("Logs Cleared!");
             } catch (Exception e) {
-                Toast.makeText(this, "Failed to clear logs!", Toast.LENGTH_SHORT).show();
+                showToast("Failed to clear logs!");
             }
         });
     }
     @Override
     protected void onDestroy() {
 
-        Toast.makeText(this, "MainActivity is being destroyed", Toast.LENGTH_SHORT).show();
+        showToast("MainActivity is being destroyed");
         getApplication().unregisterActivityLifecycleCallbacks(this);
+        saveLogcatToFile();
         super.onDestroy();
 
     }
-    private int numStarted = 0;
+    private void showToast(String message) {
+        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+    }
+    private void saveLogcatToFile() {
+        String folderName = "Logs";
+        File folderDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), folderName);
+
+        if (!folderDir.exists()) {
+            folderDir.mkdirs();
+        }
+        File logFile = new File(folderDir, LOG_FILE_NAME);
+
+        try {
+            Process process = Runtime.getRuntime().exec("logcat -d | grep com.example.rustapp");
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+
+            BufferedWriter buf = new BufferedWriter(new FileWriter(logFile, true));
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                buf.write(line);
+                buf.newLine();
+            }
+            buf.close();
+
+            showToast("Logcat saved to: " + logFile.getAbsolutePath());
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            showToast("Error saving logcat to file: " + e.getMessage());
+        }
+    }
     @Override
     public void onActivityCreated(@NonNull Activity activity, @Nullable Bundle savedInstanceState) {
 
@@ -63,7 +101,7 @@ public class MainActivity extends AppCompatActivity implements Application.Activ
     public void onActivityStarted(@NonNull Activity activity) {
         numStarted++;
         if (numStarted == 1) {
-            Log.d("RustService", "App is in foreground state");
+            Log.d("MainActivity", "App is in foreground state");
         }
     }
 
@@ -81,7 +119,7 @@ public class MainActivity extends AppCompatActivity implements Application.Activ
     public void onActivityStopped(@NonNull Activity activity) {
         numStarted--;
         if (numStarted == 0) {
-            Log.d("RustService", "App is in background state");
+            Log.d("MainActivity", "App is in background state");
         }
     }
 
