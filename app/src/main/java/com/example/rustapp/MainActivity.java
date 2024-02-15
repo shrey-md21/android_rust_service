@@ -2,12 +2,15 @@ package com.example.rustapp;
 
 import android.app.Activity;
 import android.app.Application;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
-import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -22,10 +25,12 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements Application.ActivityLifecycleCallbacks {
     private int numStarted = 0;
     private static final String LOG_FILE_NAME = "rust_logs.txt";
+    private TextView appTimer;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,6 +49,8 @@ public class MainActivity extends AppCompatActivity implements Application.Activ
                         stopService(serviceIntent);
                 });
 
+        appTimer = findViewById(R.id.appTimer);
+
         findViewById(R.id.clearLogs).setOnClickListener(view -> {
             try {
                 new FileOutputStream(new File(this.getFilesDir(), "fsmon_log.yaml")).close();
@@ -53,6 +60,37 @@ public class MainActivity extends AppCompatActivity implements Application.Activ
             }
         });
     }
+
+    private BroadcastReceiver timeUpdateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent != null && intent.getAction().equals(RustService.TIMER_UPDATED)) {
+                double time = intent.getDoubleExtra(RustService.TIME_EXTRA, 0.0);
+                updateTimer(time);
+            }
+        }
+    };
+
+    private void updateTimer(double time) {
+        String timeString = getTimeString(time);
+        appTimer.setText(timeString);
+    }
+
+    private String getTimeString(double time) {
+        int hours = (int) (time / 3600);
+        int minutes = (int) ((time % 3600)/60);
+        int seconds = (int) (time % 60);
+
+        return String.format(Locale.getDefault(), "%02d:%02d:%02d", hours, minutes, seconds);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        IntentFilter intentFilter = new IntentFilter(RustService.TIMER_UPDATED);
+        MainActivity.this.registerReceiver(timeUpdateReceiver, intentFilter);
+    }
+
     @Override
     protected void onDestroy() {
 
