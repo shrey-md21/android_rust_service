@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+<!--    this layout will work when the rust toggle is switched off.
+        it will give the following results.
+            how long the app was running
+            data used by the application
+            battery consumed due to the application
+            {location information is already implemented?}
+
+-->
+
+</LinearLayout>
