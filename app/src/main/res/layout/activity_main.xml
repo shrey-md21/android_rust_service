@@ -44,4 +44,21 @@
         android:text="Clear logs"
         android:textSize="20sp" />
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="Duration Spent"
+        android:textSize="20sp" />
+
+    <TextView
+        android:id="@+id/appTimeSpent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="10dp"
+        android:text="00:00:00"
+        android:textAlignment="center"
+        android:textSize="60sp" />
+
 </LinearLayout>

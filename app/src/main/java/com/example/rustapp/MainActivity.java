@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -30,7 +31,8 @@ import java.util.Locale;
 public class MainActivity extends AppCompatActivity implements Application.ActivityLifecycleCallbacks {
     private int numStarted = 0;
     private static final String LOG_FILE_NAME = "rust_logs.txt";
-    private TextView appTimer;
+    private TextView appTimer, appTimeSpent;
+    private double timeSpent = 0.0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,16 +42,19 @@ public class MainActivity extends AppCompatActivity implements Application.Activ
         ((MaterialSwitch) findViewById(R.id.serviceToggle))
                 .setOnCheckedChangeListener((buttonView, isChecked) -> {
                     Intent serviceIntent = new Intent(this, RustService.class);
-                    if (isChecked)
+                    if (isChecked) {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                             startForegroundService(serviceIntent);
                         else
                             startService(serviceIntent);
-                    else
+                    }
+                    else {
                         stopService(serviceIntent);
+                    }
                 });
 
         appTimer = findViewById(R.id.appTimer);
+        appTimeSpent = findViewById(R.id.appTimeSpent);
 
         findViewById(R.id.clearLogs).setOnClickListener(view -> {
             try {
@@ -73,7 +78,15 @@ public class MainActivity extends AppCompatActivity implements Application.Activ
 
     private void updateTimer(double time) {
         String timeString = getTimeString(time);
+        String timeSpentString = getTimeString(time);
         appTimer.setText(timeString);
+//        come on shreyas, figure out how you have to manage the state.
+        appTimeSpent.setText(timeSpentString);
+
+    }
+
+    private void resetTimer() {
+        appTimer.setText(0);
     }
 
     private String getTimeString(double time) {
