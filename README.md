@@ -52,7 +52,7 @@ A `docker-compose.yml` and `Dockerfile` are available in this repository. `docke
 
 8. Install dependencies using `sdkmanager`. The following packages are required to build the app. 
     ```shell
-    sdkmanager "build-tools;30.0.3" "emulator" "ndk;25.2.9519653" "patcher;v4" "platform-tools" "platforms;android-33"
+    sdkmanager "build-tools;30.0.3" "emulator" "ndk;25.2.9519653" "platform-tools" "platforms;android-33"
     ```
 
     | Path                 | Version      | Description                     | Location             |
@@ -63,6 +63,8 @@ A `docker-compose.yml` and `Dockerfile` are available in this repository. `docke
     | patcher;v4           | 1            | SDK Patch Applier v4            | patcher/v4           |
     | platform-tools       | 34.0.3       | Android SDK Platform-Tools      | platform-tools       |
     | platforms;android-33 | 2            | Android SDK Platform 33         | platforms/android-33 |
+    
+    > _NOTE:_ The patcher;v4 is not working and found. thus, don't install it in `sdkmanager`.
 
 9. Clone the repository & chdir into it and build.
     ```shell
