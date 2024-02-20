@@ -1,18 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
-
     <application
         android:icon="@mipmap/ic_launcher"
         android:label="Rust App"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:theme="@style/Theme.Material3.DayNight.NoActionBar">
+        <profileable android:shell="true" />
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -22,8 +21,8 @@
             </intent-filter>
         </activity>
         <service
-            android:label="Rust Service"
-            android:name=".RustService" />
+            android:name=".RustService"
+            android:label="Rust Service" />
     </application>
 
 </manifest>

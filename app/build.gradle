@@ -1,3 +1,15 @@
+buildscript {
+    dependencies {
+        classpath("com.google.gms:google-services:4.4.1")
+        classpath("com.android.tools.build:gradle:7.4.2")
+    }
+    repositories {
+        mavenCentral()
+        gradlePluginPortal()
+        google()
+    }
+}
+
 plugins {
     id 'com.android.application' version '8.0.2'
     id 'org.mozilla.rust-android-gradle.rust-android' version '0.9.3'
@@ -20,7 +32,15 @@ android {
         release {
             minifyEnabled true
             shrinkResources true
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt')
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.debug
+        }
+        benchmark {
+            initWith(release)
+            signingConfig = signingConfigs.getByName("debug")
+            matchingFallbacks = ['release']
+            proguardFiles("benchmark-rules.pro")
+            debuggable(false)
         }
     }
   
@@ -31,8 +51,12 @@ android {
 }
 
 dependencies {
-    implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.android.material:material:1.9.0'
+    implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation("com.google.android.material:material:1.11.0")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+    testImplementation("junit:junit:4.13.2")
+    androidTestImplementation("androidx.test.ext:junit:1.1.5")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
 }
 
 cargo {

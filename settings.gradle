@@ -16,3 +16,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Rust App"
 include ':app'
+include ':benchmark'
