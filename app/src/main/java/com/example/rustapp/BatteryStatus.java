@@ -5,11 +5,20 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.BatteryManager;
+import android.os.Bundle;
 import android.widget.TextView;
 
-public class BatteryStatus extends MainActivity{
-    public TextView battery_information = findViewById(R.id.battery_information);
-//    registerReceiver(this.batteryInfoReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+public class BatteryStatus extends MainActivity {
+    private TextView battery_information;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_battery_status);
+
+        battery_information = findViewById(R.id.battery_information);
+        registerReceiver(batteryInfoReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+    }
 
     BroadcastReceiver batteryInfoReceiver = new BroadcastReceiver() {
         @Override
@@ -23,14 +32,14 @@ public class BatteryStatus extends MainActivity{
             int temperature = intent.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, 0);
             int voltage = intent.getIntExtra(BatteryManager.EXTRA_VOLTAGE, 0);
 
-            battery_information.setText("health" + health + "\n" +
-                                        "level" + level + "\n" +
-                                        "plugged" + plugged + "\n" +
-                                        "status : " + status + "\n" +
-                                        "present : " + present + "\n" +
-                                        "technology : " + technology + "\n" +
-                                        "temperature : " + temperature + "\n" +
-                                        "voltage : " + voltage + "\n");
+            battery_information.setText("Health: " + health + "\n" +
+                    "Level: " + level + "\n" +
+                    "Plugged: " + plugged + "\n" +
+                    "Status: " + status + "\n" +
+                    "Present: " + present + "\n" +
+                    "Technology: " + technology + "\n" +
+                    "Temperature: " + temperature + "\n" +
+                    "Voltage: " + voltage + "\n");
         }
     };
 }

@@ -6,11 +6,11 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
@@ -32,6 +32,7 @@ public class MainActivity extends AppCompatActivity implements Application.Activ
     private int numStarted = 0;
     private static final String LOG_FILE_NAME = "rust_logs.txt";
     private TextView appTimer, appTimeSpent;
+    private Button data_usage_information, battery_information;
     private double timeSpent = 0.0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,8 +66,11 @@ public class MainActivity extends AppCompatActivity implements Application.Activ
             }
         });
 
+        data_usage_information = findViewById(R.id.datausagebutton);
+        data_usage_information.setOnClickListener(v -> startActivity(new Intent(MainActivity.this, DataUsage.class)));
 
-
+        battery_information = findViewById(R.id.batterybutton);
+        battery_information.setOnClickListener(v -> startActivity(new Intent(MainActivity.this, BatteryStatus.class)));
     }
 
     private BroadcastReceiver timeUpdateReceiver = new BroadcastReceiver() {
