@@ -64,6 +64,9 @@ public class MainActivity extends AppCompatActivity implements Application.Activ
                 showToast("Failed to clear logs!");
             }
         });
+
+
+
     }
 
     private BroadcastReceiver timeUpdateReceiver = new BroadcastReceiver() {
