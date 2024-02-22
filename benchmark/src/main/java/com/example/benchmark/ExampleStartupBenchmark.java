@@ -34,10 +34,11 @@ public class ExampleStartupBenchmark {
     public void startup() {
         mBenchmarkRule.measureRepeated(
                 "com.example.rustapp",
+//                how long does it take to start the app at each iteration
                 Collections.singletonList(new StartupTimingMetric()),
                 CompilationMode.DEFAULT,
                 StartupMode.COLD,
-                5,
+                20,
                 scope -> {
                     scope.pressHome();
                     scope.startActivityAndWait();
