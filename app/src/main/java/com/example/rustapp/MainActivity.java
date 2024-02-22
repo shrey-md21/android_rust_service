@@ -16,9 +16,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-
 import com.google.android.material.materialswitch.MaterialSwitch;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -29,16 +27,26 @@ import java.io.InputStreamReader;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements Application.ActivityLifecycleCallbacks {
+
     private int numStarted = 0;
     private static final String LOG_FILE_NAME = "rust_logs.txt";
     private TextView appTimer, appTimeSpent;
     private Button data_usage_information, battery_information;
-    private double timeSpent = 0.0;
+    private double totalTimeSpent = 0.0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         getApplication().registerActivityLifecycleCallbacks(this);
+
+        initializeUI();
+    }
+
+    private void initializeUI() {
+
+        appTimer = findViewById(R.id.appTimer);
+        appTimeSpent = findViewById(R.id.appTimeSpent);
 
         ((MaterialSwitch) findViewById(R.id.serviceToggle))
                 .setOnCheckedChangeListener((buttonView, isChecked) -> {
@@ -51,11 +59,10 @@ public class MainActivity extends AppCompatActivity implements Application.Activ
                     }
                     else {
                         stopService(serviceIntent);
+                        resetStarterTimer();
+                        updateLatestTimeSpent(totalTimeSpent);
                     }
                 });
-
-        appTimer = findViewById(R.id.appTimer);
-        appTimeSpent = findViewById(R.id.appTimeSpent);
 
         findViewById(R.id.clearLogs).setOnClickListener(view -> {
             try {
@@ -78,22 +85,26 @@ public class MainActivity extends AppCompatActivity implements Application.Activ
         public void onReceive(Context context, Intent intent) {
             if (intent != null && intent.getAction().equals(RustService.TIMER_UPDATED)) {
                 double time = intent.getDoubleExtra(RustService.TIME_EXTRA, 0.0);
-                updateTimer(time);
+                String timeString = getTimeString(time);
+                updateRunningTimer(timeString);
+                totalTimeSpent = time;
             }
         }
     };
 
-    private void updateTimer(double time) {
-        String timeString = getTimeString(time);
-        String timeSpentString = getTimeString(time);
+    private String updateRunningTimer(String timeString) {
         appTimer.setText(timeString);
-//        come on shreyas, figure out how you have to manage the state.
-        appTimeSpent.setText(timeSpentString);
+        return timeString;
+    }
+
+    private void updateLatestTimeSpent(double totalTimeSpent) {
+        String totalTimeString = getTimeString(totalTimeSpent);
+        appTimeSpent.setText(totalTimeString);
 
     }
 
-    private void resetTimer() {
-        appTimer.setText(0);
+    private void resetStarterTimer() {
+        appTimer.setText(getTimeString(0.0));
     }
 
     private String getTimeString(double time) {
