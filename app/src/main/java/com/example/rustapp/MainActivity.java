@@ -16,6 +16,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
 import com.google.android.material.materialswitch.MaterialSwitch;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -40,13 +42,11 @@ public class MainActivity extends AppCompatActivity implements Application.Activ
         setContentView(R.layout.activity_main);
         getApplication().registerActivityLifecycleCallbacks(this);
 
-        initializeUI();
-    }
-
-    private void initializeUI() {
-
         appTimer = findViewById(R.id.appTimer);
         appTimeSpent = findViewById(R.id.appTimeSpent);
+
+        IntentFilter filter = new IntentFilter(RustService.ACTION_IF_SERVICE_IDLE);
+        LocalBroadcastManager.getInstance(this).registerReceiver(serviceIdleReceiver, filter);
 
         ((MaterialSwitch) findViewById(R.id.serviceToggle))
                 .setOnCheckedChangeListener((buttonView, isChecked) -> {
@@ -80,9 +80,20 @@ public class MainActivity extends AppCompatActivity implements Application.Activ
         battery_information.setOnClickListener(v -> startActivity(new Intent(MainActivity.this, BatteryStatus.class)));
     }
 
+    private BroadcastReceiver serviceIdleReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if(action != null && action.equals((RustService.ACTION_IF_SERVICE_IDLE))) {
+                Log.d("MainActivity", "App is in background state and is idle!");
+            }
+        }
+    };
+
     private BroadcastReceiver timeUpdateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+
             if (intent != null && intent.getAction().equals(RustService.TIMER_UPDATED)) {
                 double time = intent.getDoubleExtra(RustService.TIME_EXTRA, 0.0);
                 String timeString = getTimeString(time);
@@ -125,6 +136,7 @@ public class MainActivity extends AppCompatActivity implements Application.Activ
     @Override
     protected void onDestroy() {
 
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(serviceIdleReceiver);
         showToast("MainActivity is being destroyed");
         getApplication().unregisterActivityLifecycleCallbacks(this);
         saveLogcatToFile();

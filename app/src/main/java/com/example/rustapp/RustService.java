@@ -6,8 +6,11 @@ import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
+
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -26,6 +29,17 @@ public class RustService extends Service {
     }
 
     private static native void startService(String filesDir);
+
+    private static boolean isIdle = true;
+    public static final String ACTION_IF_SERVICE_IDLE = "com.example.rustapp.SERVICE_IDLE";
+
+    public void setIsIdle(boolean idle) {
+        isIdle = idle;
+        if(isIdle) {
+            Intent intent = new Intent(ACTION_IF_SERVICE_IDLE);
+            LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+        }
+    }
 
     @Override
     public void onCreate() {
@@ -50,6 +64,13 @@ public class RustService extends Service {
         // default time to 0
         double time = 0.0;
         startTimer(time);
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                setIsIdle(true);
+            }
+        }, 15000);
 
         return Service.START_STICKY;
     }
