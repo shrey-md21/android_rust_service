@@ -3,6 +3,7 @@ package com.example.rustapp;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Build;
@@ -42,7 +43,7 @@ public class RustService extends Service {
 
         // create and display notification
         createNotificationChannel();
-        startForeground(NOTIFICATION_ID, buildNotification());
+        startForeground(NOTIFICATION_ID, BuildNotification());
 
         // service is started
         startService(this.getFilesDir().toString());
@@ -50,6 +51,9 @@ public class RustService extends Service {
         // default time to 0
         double time = 0.0;
         startTimer(time);
+
+        // to show notification that the app is active once again
+        startForeground(NOTIFICATION_ID, RestartNotification());
 
         return Service.START_STICKY;
     }
@@ -99,13 +103,9 @@ public class RustService extends Service {
         }
     }
 
-    private Notification buildNotification() {
+    private Notification BuildNotification() {
         Notification.Builder builder;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            builder = new Notification.Builder(this, DEFAULT_CHANNEL_ID);
-        } else {
-            builder = new Notification.Builder(this);
-        }
+        builder = new Notification.Builder(this, DEFAULT_CHANNEL_ID);
 
         builder.setContentTitle("Rust Service")
                 .setContentText("Running...")
@@ -116,5 +116,23 @@ public class RustService extends Service {
         Log.d("RustService", logMessages);
 
         return builder.build();
+    }
+
+    private Notification RestartNotification() {
+        Notification.Builder builder;
+        builder = new Notification.Builder(this, DEFAULT_CHANNEL_ID);
+
+        builder.setContentTitle("Rust Service is Active")
+                .setContentText("Tap to open the App")
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentIntent(createPendingIntent())
+                .setPriority(Notification.PRIORITY_DEFAULT);
+
+        return builder.build();
+    }
+
+    private PendingIntent createPendingIntent() {
+        Intent notificationIntent = new Intent(this, MainActivity.class);
+        return PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 }

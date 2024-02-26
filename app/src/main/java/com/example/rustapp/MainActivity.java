@@ -16,6 +16,11 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.work.Constraints;
+import androidx.work.NetworkType;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
+
 import com.google.android.material.materialswitch.MaterialSwitch;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -25,6 +30,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity implements Application.ActivityLifecycleCallbacks {
 
@@ -39,11 +45,6 @@ public class MainActivity extends AppCompatActivity implements Application.Activ
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         getApplication().registerActivityLifecycleCallbacks(this);
-
-        initializeUI();
-    }
-
-    private void initializeUI() {
 
         appTimer = findViewById(R.id.appTimer);
         appTimeSpent = findViewById(R.id.appTimeSpent);
@@ -78,6 +79,22 @@ public class MainActivity extends AppCompatActivity implements Application.Activ
 
         battery_information = findViewById(R.id.batterybutton);
         battery_information.setOnClickListener(v -> startActivity(new Intent(MainActivity.this, BatteryStatus.class)));
+
+        schedulePeriodicWork();
+    }
+
+    private void schedulePeriodicWork() {
+
+        Constraints constraints = new Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.CONNECTED)
+                .build();
+
+        PeriodicWorkRequest workRequest = new PeriodicWorkRequest.Builder(RustServiceWork.class, 1, TimeUnit.MINUTES)
+                .setConstraints(constraints)
+                .build();
+
+        WorkManager.getInstance(this).enqueue((workRequest));
+
     }
 
     private BroadcastReceiver timeUpdateReceiver = new BroadcastReceiver() {
