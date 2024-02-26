@@ -19,22 +19,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/appTimer"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:padding="10dp"
-        android:text="00:00:00"
-        android:textAlignment="center"
-        android:textSize="60sp" />
-
-    <!--    <Button-->
-    <!--        android:id="@+id/resetButton"-->
-    <!--        android:layout_width="wrap_content"-->
-    <!--        android:layout_height="wrap_content"-->
-    <!--        android:text="DISCONNECT" />-->
-
     <Button
         style="@style/Widget.Material3.Button"
         android:id="@+id/clearLogs"
@@ -43,51 +27,5 @@
         android:layout_marginTop="25dp"
         android:text="Clear logs"
         android:textSize="20sp" />
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:text="Duration Spent"
-        android:textSize="20sp" />
-
-    <TextView
-        android:id="@+id/appTimeSpent"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:padding="10dp"
-        android:text="00:00:00"
-        android:textAlignment="center"
-        android:textSize="60sp" />
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="16dp" >
-
-        <Button
-            android:id="@+id/datausagebutton"
-            style="@style/Widget.Material3.Button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Check Data Usage"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentStart="true"
-            android:layout_marginStart="16dp"
-            android:layout_marginBottom="16dp"/>
-
-        <Button
-            android:id="@+id/batterybutton"
-            style="@style/Widget.Material3.Button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Check Battery"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentEnd="true"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="16dp" />
-
-    </RelativeLayout>
 
 </LinearLayout>
