@@ -1,5 +1,6 @@
 package com.example.rustapp;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Application;
 import android.content.BroadcastReceiver;
@@ -17,11 +18,16 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.work.Constraints;
+import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.NetworkType;
 import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
+import androidx.work.WorkRequest;
 
 import com.google.android.material.materialswitch.MaterialSwitch;
+import com.google.common.util.concurrent.ListenableFuture;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -29,7 +35,9 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity implements Application.ActivityLifecycleCallbacks {
@@ -40,6 +48,9 @@ public class MainActivity extends AppCompatActivity implements Application.Activ
     private Button data_usage_information, battery_information;
     private double totalTimeSpent = 0.0;
 
+    private WorkRequest workRequest;
+
+    @SuppressLint("ObsoleteSdkInt")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,6 +60,11 @@ public class MainActivity extends AppCompatActivity implements Application.Activ
         appTimer = findViewById(R.id.appTimer);
         appTimeSpent = findViewById(R.id.appTimeSpent);
 
+        workRequest = new PeriodicWorkRequest.Builder(RustServiceWork.class,
+                15*60*1000, //15 mins is minimum
+                TimeUnit.MILLISECONDS)
+                .build();
+
         ((MaterialSwitch) findViewById(R.id.serviceToggle))
                 .setOnCheckedChangeListener((buttonView, isChecked) -> {
                     Intent serviceIntent = new Intent(this, RustService.class);
@@ -57,9 +73,11 @@ public class MainActivity extends AppCompatActivity implements Application.Activ
                             startForegroundService(serviceIntent);
                         else
                             startService(serviceIntent);
+                        WorkManager.getInstance(this).enqueue(workRequest);
                     }
                     else {
                         stopService(serviceIntent);
+                        WorkManager.getInstance(this).cancelAllWorkByTag("rust_service_work");
                         resetStarterTimer();
                         updateLatestTimeSpent(totalTimeSpent);
                     }
@@ -74,13 +92,33 @@ public class MainActivity extends AppCompatActivity implements Application.Activ
             }
         });
 
+
+
+//        if (!isWorkScheduled()) {
+//            schedulePeriodicWork();
+//        }
+
         data_usage_information = findViewById(R.id.datausagebutton);
         data_usage_information.setOnClickListener(v -> startActivity(new Intent(MainActivity.this, DataUsage.class)));
 
         battery_information = findViewById(R.id.batterybutton);
         battery_information.setOnClickListener(v -> startActivity(new Intent(MainActivity.this, BatteryStatus.class)));
+    }
 
-        schedulePeriodicWork();
+    private boolean isWorkScheduled() {
+        WorkManager workManager = WorkManager.getInstance(this);
+        ListenableFuture<List<WorkInfo>> future = workManager.getWorkInfosByTag("rust_service_work");
+        try {
+            List<WorkInfo> workInfos = future.get();
+            for (WorkInfo workInfo : workInfos) {
+                if (workInfo.getState() == WorkInfo.State.ENQUEUED || workInfo.getState() == WorkInfo.State.RUNNING) {
+                    return true;
+                }
+            }
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     private void schedulePeriodicWork() {
@@ -91,13 +129,16 @@ public class MainActivity extends AppCompatActivity implements Application.Activ
 
         PeriodicWorkRequest workRequest = new PeriodicWorkRequest.Builder(RustServiceWork.class, 1, TimeUnit.MINUTES)
                 .setConstraints(constraints)
+                .addTag("rust_service_work")
                 .build();
 
-        WorkManager.getInstance(this).enqueue((workRequest));
-
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+                "rust_service_work",
+                ExistingPeriodicWorkPolicy.KEEP,
+                workRequest);
     }
 
-    private BroadcastReceiver timeUpdateReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver timeUpdateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent != null && intent.getAction().equals(RustService.TIMER_UPDATED)) {
@@ -206,6 +247,7 @@ public class MainActivity extends AppCompatActivity implements Application.Activ
         numStarted--;
         if (numStarted == 0) {
             Log.d("MainActivity", "App is in background state");
+//            schedulePeriodicWork();
         }
     }
 

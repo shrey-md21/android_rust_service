@@ -1,6 +1,7 @@
 package com.example.rustapp;
 
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 
@@ -18,9 +19,24 @@ public class RustServiceWork extends Worker {
     @Override
     public Result doWork() {
         Context context = getApplicationContext();
-        Intent serviceIntent = new Intent(context, RustService.class);
-        ContextCompat.startForegroundService(context, serviceIntent);
 
+        if(!isServiceRunning(context)) {
+            // starting service if its not yet started
+            Intent serviceIntent = new Intent(context, RustService.class);
+            ContextCompat.startForegroundService(context, serviceIntent);
+        }
         return Result.success();
+    }
+
+    private boolean isServiceRunning(Context context) {
+        ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        if (activityManager != null) {
+            for (ActivityManager.RunningServiceInfo service : activityManager.getRunningServices(Integer.MAX_VALUE)) {
+                if (RustService.class.getName().equals(service.service.getClassName())) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

@@ -3,12 +3,19 @@ package com.example.rustapp;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleEventObserver;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.OnLifecycleEvent;
+import androidx.lifecycle.ProcessLifecycleOwner;
+import androidx.work.WorkManager;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -17,9 +24,6 @@ public class RustService extends Service {
     private static final String DEFAULT_CHANNEL_ID = "RustServiceChannel";
     private static final int NOTIFICATION_ID = 1;
 
-    public static final String TIME_EXTRA = "timeExtra";
-
-    public static final String TIMER_UPDATED = "timeUpdated";
     private Timer timer;
 
     static {
@@ -28,11 +32,13 @@ public class RustService extends Service {
 
     private static native void startService(String filesDir);
 
+    public static final String TIMER_UPDATED = "timeUpdated";
+    public static final String TIME_EXTRA = "timeExtra";
+
     @Override
     public void onCreate() {
         super.onCreate();
-        String logMessages = "Service Created";
-        Log.d("RustService",logMessages);
+        WorkManager.getInstance(this);
     }
 
     @Override
@@ -41,7 +47,6 @@ public class RustService extends Service {
         String logMessages = "Service Started";
         Log.d("RustService",logMessages);
 
-        // create and display notification
         createNotificationChannel();
         startForeground(NOTIFICATION_ID, BuildNotification());
 
@@ -51,9 +56,6 @@ public class RustService extends Service {
         // default time to 0
         double time = 0.0;
         startTimer(time);
-
-        // to show notification that the app is active once again
-        startForeground(NOTIFICATION_ID, RestartNotification());
 
         return Service.START_STICKY;
     }
@@ -116,23 +118,5 @@ public class RustService extends Service {
         Log.d("RustService", logMessages);
 
         return builder.build();
-    }
-
-    private Notification RestartNotification() {
-        Notification.Builder builder;
-        builder = new Notification.Builder(this, DEFAULT_CHANNEL_ID);
-
-        builder.setContentTitle("Rust Service is Active")
-                .setContentText("Tap to open the App")
-                .setSmallIcon(R.mipmap.ic_launcher)
-                .setContentIntent(createPendingIntent())
-                .setPriority(Notification.PRIORITY_DEFAULT);
-
-        return builder.build();
-    }
-
-    private PendingIntent createPendingIntent() {
-        Intent notificationIntent = new Intent(this, MainActivity.class);
-        return PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 }
